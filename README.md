@@ -8,7 +8,6 @@ Qt QTextEdit点击不同文本（关键字）触发不同事件（弹出菜单�
 （1）在QTextEdit中展示一些模板文本，然后一些关键数据可以进行选择替换，比如像如下代码所示，模板原始数据的一些关键数据通过方括号括起来（ [我|你|他] ），可选内容通过竖线分割，在QTextEdit中展示时只显示可选项中的一个；
 
 QString template= "[我|你|他]有一个[梦想|想法|麻烦]。";
-
 （2）关键数据高亮显示，点击显示所有可选项菜单，选择后进行替换；
 
 直接看实现效果图（点击“梦想”关键字，然后选择“想法”）：
@@ -36,7 +35,6 @@ QTextCharFormat charformat = textCursor().charFormat();
 charformat.setForeground(QColor(80, 20, 250));
 textCursor().setCharFormat(charformat);
 textCursor().insertText(keyword);
-
 （4）点击关键字弹出选项菜单
 
 实现第③个需求点需要明确几个问题：
@@ -57,16 +55,12 @@ b. 如果我再手动输入一个”想法“，那么这个想法是关键字�
 
 charformat.setAnchorName(QString::number(index));
 charformat.setAnchor(true);
-
 这样我们就可以通过charformat.isAnchor()来判断点击的是不是关键字，在通过anchorName来判断点击的是哪个关键字，剩下的就是创建菜单项和触发替换文本。
 
 if(charformat.isAnchor())
 {
     ...
 }
-
 （5）关键字替换
 
 上面几步中，我们用到的QTextCharFormat是绑定到单个字符的，也就是文本中的每个字符都有对应的QTextCharFormat信息，而我们点击的时候是判断单个字符的格式，因此我们并不知道完整的关键字有几个字符，从哪里开始到哪里结束，所以替换的时候还是有点麻烦。在这里是以点击的字符为中心向两边扫描，找出所有格式相同的字符，即为关键字的范围，替换时删掉这些字符并插入新的选项；
-
-
