@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     KTextEdit *pEdit = new KTextEdit();
     setCentralWidget(pEdit);
     InitStyle();
-    QString strText = "[我|你|他]有一个[梦想|想法|麻烦]。";
+    QString strText = "[我|你|他]有一个[梦想|想法|麻烦]。\n[我|你|他]有一个[梦想|想法|麻烦]。\n[我|你|他]有一个[梦想|想法|麻烦]。\n[我|你|他]有一个[梦想|想法|麻烦]。\n[我|你|他]有一个[梦想|想法|麻烦]。";
 
     pEdit->SetText(strText);
 }

@@ -18,7 +18,7 @@ void KTextEdit::SetText(const QString &strTextOrgin)
     m_OptionsMap.clear();
     QList<QString> clickable_text_list;
 
-    QRegExp rx("(\\[\.+(\\|\.+)+\\])");
+    QRegExp rx("(\\[[^\\[]+(\\|[^\\[]+)*\\])");
     rx.setMinimal(true);
     int pos = 0;
     QString strText(strTextOrgin);
@@ -62,12 +62,16 @@ void KTextEdit::OnCursorMove()
     if(tTextCursor.hasSelection())
         return;
     QTextCharFormat clickable_charformat = tTextCursor.charFormat();
+    if(!clickable_charformat.isAnchor() && !tTextCursor.atEnd())
+    {
+        tTextCursor.movePosition(QTextCursor::Right);
+        clickable_charformat = tTextCursor.charFormat();
+    }
     if(clickable_charformat.isAnchor())
     {
         QTextBlock block = tTextCursor.block();
-        m_iBlockOffset = block.position();
         QString text = block.text();
-        m_iOriginalTextEndIndex = tTextCursor.positionInBlock() ;
+        m_iOriginalTextEndIndex = tTextCursor.position() ;
         m_iOriginalTextStartIndex = m_iOriginalTextEndIndex - 1;
         if(tTextCursor.movePosition(QTextCursor::Left))
         {
@@ -77,7 +81,7 @@ void KTextEdit::OnCursorMove()
 
                 if(!tTextCursor.movePosition(QTextCursor::Left))
                     break;
-                m_iOriginalTextStartIndex = tTextCursor.positionInBlock();
+                m_iOriginalTextStartIndex = tTextCursor.position();
                 fmt1 = tTextCursor.charFormat();
             }
         }
@@ -87,7 +91,7 @@ void KTextEdit::OnCursorMove()
             QTextCharFormat fmt1 = tTextCursor.charFormat();
             while(fmt1.anchorName() == clickable_charformat.anchorName())
             {
-                m_iOriginalTextEndIndex = tTextCursor.positionInBlock();
+                m_iOriginalTextEndIndex = tTextCursor.position();
                 if(!tTextCursor.movePosition(QTextCursor::Right))
                     break;
                 fmt1 = tTextCursor.charFormat();
@@ -103,10 +107,7 @@ void KTextEdit::OnCursorMove()
             QAction *pAction  = menu.addAction(m_OptionsMap[id][i]);
             connect(pAction, &QAction::triggered, [=](){
                 QTextCursor text_cursor = textCursor();
-                int start = m_iBlockOffset + m_iOriginalTextStartIndex;
-                if(start < 0)
-                    start =0;
-                for(int i = m_iBlockOffset + m_iOriginalTextEndIndex; i >= start; i--)
+                for(int i = m_iOriginalTextEndIndex; i >= m_iOriginalTextStartIndex; i--)
                 {
                     text_cursor.setPosition(i);
                     QTextCharFormat ff = text_cursor.charFormat();
@@ -114,8 +115,11 @@ void KTextEdit::OnCursorMove()
                     {
                         text_cursor.deletePreviousChar();
                     }
+                    else
+                    {
+                        break;
+                    }
                 }
-                text_cursor.setPosition(start);
                 text_cursor.insertText(m_OptionsMap[id][i], clickable_charformat);
             });
         }

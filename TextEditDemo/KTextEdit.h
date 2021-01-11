@@ -17,6 +17,5 @@ private:
     std::map<int, QList<QString>> m_OptionsMap;
     int m_iOriginalTextEndIndex;
     int m_iOriginalTextStartIndex;
-    int m_iBlockOffset;
 };
 
